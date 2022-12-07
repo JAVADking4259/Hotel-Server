@@ -11,9 +11,13 @@ async function createQuestion(inputData) {
 }
 async function getQuestion() {
     const result = await repository.getQuestion();
+    const Result = {
+        question: result[0].question,
+        id: result[0].id
+    }
     return {
         message: 'success',
-        result: result[0]
+        result: Result
     }
 }
 

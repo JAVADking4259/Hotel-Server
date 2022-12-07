@@ -4,6 +4,7 @@ const { registerSchema, loginSchema } = require('../../../utils/schema');
 const { validate } = require('../../../utils/validator');
 const bcrypt = require('bcryptjs');
 const moment = require('moment-jalaali');
+const repository = require('../../../utils/initializer');
 const { checkAccess } = require('../../../utils/accessControl');
 const { sendEmail } = require('../../../utils/mailer');
 
@@ -40,9 +41,17 @@ async function login(req, res) {
     try {
         const inputData = {
             email: req.body.email,
-            password: req.body.password
+            password: req.body.password,
+            answer: req.body.answer
         }
         await validate(inputData, loginSchema)
+        const captcha = await repository.mongoDB.collection('questions').findOne({ answer: inputData.answer })
+        if (!captcha) {
+            throw {
+                status: 403,
+                data: { message: "جواب سوال اشتیاه است" }
+            }
+        }
         let result = await bl.login(inputData);
         res.status(200).send(result);
     } catch (err) {
